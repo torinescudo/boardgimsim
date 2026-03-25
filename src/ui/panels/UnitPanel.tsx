@@ -1,4 +1,5 @@
 import React from 'react';
+import { COLORS } from '../theme';
 import { UnitInstance } from '../../engine/core/types';
 import { getUnitDef, getLeaderDef } from '../../content/units/index';
 import { LEADERS } from '../../content/leaders/leaders';
@@ -7,12 +8,6 @@ interface UnitPanelProps {
   unit: UnitInstance;
 }
 
-const FACTION_COLORS: Record<string, string> = {
-  HUMAN: '#d4a017',
-  ELF: '#22c55e',
-  ORC: '#dc2626',
-  UNDEAD: '#8b5cf6',
-};
 
 const AFFINITY_LABELS: Record<string, string> = {
   SUN: 'Sol',

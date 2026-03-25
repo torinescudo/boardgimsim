@@ -8,7 +8,7 @@ import {
 } from '../core/types';
 import {
   getPlayer, getOpponent, addLog, createUnitInstance,
-  getBaseActions, getExtraActionCost,
+  getBaseActions, getExtraActionCost, getDefinitionName,
 } from '../state/gameState';
 import {
   hexDistance, hexEquals, getCell, hexNeighbors,
@@ -447,8 +447,19 @@ function execEndTurn(state: GameState): string | null {
 
 function endRound(state: GameState): void {
   addLog(state, 'ROUND_END', `Fin de ronda ${state.round}.`);
+  endRoundPhase_VillageHealing(state);
+  endRoundPhase_RemainsRevival(state);
+  if (endRoundPhase_CityControl(state)) return; // Game over
+  const cityControl = checkCityControl(state);
+  endRoundPhase_BlessingAssignment(state, cityControl);
+  endRoundPhase_ShopRotation(state);
+  endRoundPhase_AdvanceRound(state);
+  endRoundPhase_GoldCollection(state);
+  endRoundPhase_ResetUnits(state);
+  endRoundPhase_SetupFirstPlayerTurn(state);
+}
 
-  // 1. Village healing
+function endRoundPhase_VillageHealing(state: GameState): void {
   for (const unit of state.units) {
     if (unit.hp <= 0) continue;
     const cell = getCell(state.map, unit.position);
@@ -457,13 +468,13 @@ function endRound(state: GameState): void {
       addLog(state, 'HEAL', `${getDefName(unit.defId)} cura 1 HP en aldea.`, unit.ownerPlayerId);
     }
   }
+}
 
-  // 2. Revive Guardia Ósea remains
+function endRoundPhase_RemainsRevival(state: GameState): void {
   const tokensToRemove: number[] = [];
   for (let i = 0; i < state.remainsTokens.length; i++) {
     const token = state.remainsTokens[i];
     if (!isHexOccupied(state.units, token.position)) {
-      // Find the dead unit and revive it
       const deadUnit = state.units.find(u => u.instanceId === token.instanceId);
       if (deadUnit) {
         deadUnit.hp = 1;
@@ -475,31 +486,36 @@ function endRound(state: GameState): void {
       tokensToRemove.push(i);
     }
   }
-  // Remove processed tokens (reverse order)
   for (let i = tokensToRemove.length - 1; i >= 0; i--) {
     state.remainsTokens.splice(tokensToRemove[i], 1);
   }
+}
 
-  // 3. Check city control and victory
+function endRoundPhase_CityControl(state: GameState): boolean {
   const cityControl = checkCityControl(state);
   if (cityControl.winner) {
     state.winner = { playerId: cityControl.winner, reason: 'CITY_DOMINATION' };
     state.phase = 'GAME_OVER';
     addLog(state, 'VICTORY', `¡${cityControl.winner} gana por dominio de ciudades (${cityControl.counts[cityControl.winner]}/${cityControl.totalCities})!`, cityControl.winner);
-    return;
+    return true;
   }
+  return false;
+}
 
-  // 4. Blessing del Pueblo
+function endRoundPhase_BlessingAssignment(state: GameState, cityControl: ReturnType<typeof checkCityControl>): void {
   checkAndAssignBlessing(state, cityControl);
+}
 
-  // 5. Rotate shop (oldest card)
+function endRoundPhase_ShopRotation(state: GameState): void {
   rotateShop(state);
+}
 
-  // 6. Advance round
+function endRoundPhase_AdvanceRound(state: GameState): void {
   state.round += 1;
   state.cycle = state.round % 2 === 1 ? 'DAY' : 'NIGHT';
+}
 
-  // 7. Collect gold from villages
+function endRoundPhase_GoldCollection(state: GameState): void {
   for (const player of state.players) {
     const goldFromVillages = countControlledVillages(state, player.id);
     if (goldFromVillages > 0) {
@@ -507,8 +523,9 @@ function endRound(state: GameState): void {
       addLog(state, 'INCOME', `${player.id} recibe ${goldFromVillages} oro de aldeas.`, player.id);
     }
   }
+}
 
-  // 8. Reset units for new round
+function endRoundPhase_ResetUnits(state: GameState): void {
   for (const unit of state.units) {
     unit.hasActivatedThisRound = false;
     unit.exhausted = false;
@@ -519,19 +536,17 @@ function endRound(state: GameState): void {
     unit.hasAttackedThisRound = false;
     unit.traitUsages = {};
   }
+}
 
-  // 9. Set up first player's turn
+function endRoundPhase_SetupFirstPlayerTurn(state: GameState): void {
   state.activePlayerId = state.initiativePlayerId;
   const firstPlayer = getPlayer(state, state.initiativePlayerId);
   firstPlayer.actionsRemaining = getBaseActions(state.round);
   firstPlayer.extraActionsPurchasedThisRound = 0;
   state.shop.refreshUsedThisTurn = false;
-
-  // Clear heal blocks from previous round
   for (const unit of state.units) {
     unit.statusEffects = unit.statusEffects.filter(e => e.type !== 'HEAL_BLOCKED');
   }
-
   addLog(state, 'ROUND_START', `Ronda ${state.round} – ${state.cycle === 'DAY' ? 'Día' : 'Noche'}.`);
 }
 
@@ -615,13 +630,8 @@ function execUseBlessing(state: GameState, action: { type: 'USE_BLESSING'; unitI
 
 // ── Helpers ──
 
-function getDefName(defId: string): string {
-  const unit = getUnitDef(defId);
-  if (unit) return unit.name;
-  const leader = getLeaderDef(defId);
-  if (leader) return leader.name;
-  return defId;
-}
+// Deprecated: use getDefinitionName from gameState instead
+const getDefName = getDefinitionName;
 
 function canHeal(unit: UnitInstance): boolean {
   return !unit.statusEffects.some(e => e.type === 'HEAL_BLOCKED');

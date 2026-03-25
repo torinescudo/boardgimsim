@@ -40,12 +40,6 @@ const TERRAIN_LABELS: Record<TerrainType, string> = {
   WATER: '~',
 };
 
-const FACTION_COLORS: Record<string, string> = {
-  HUMAN: '#d4a017',
-  ELF: '#22c55e',
-  ORC: '#dc2626',
-  UNDEAD: '#8b5cf6',
-};
 
 function axialToPixel(q: number, r: number): { x: number; y: number } {
   const x = HEX_SIZE * (SQRT3 * q + (SQRT3 / 2) * r);

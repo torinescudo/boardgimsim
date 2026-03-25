@@ -3,6 +3,7 @@ import { GameState, PlayerState, BlessingState } from '../../engine/core/types';
 import { getPlayer, getBaseActions, getMaxExtraActions, getExtraActionCost } from '../../engine/state/gameState';
 import { getLeaderDef } from '../../content/units/index';
 import { getCityControl, getTotalCities, canBuyExtraAction } from '../../engine/selectors/selectors';
+import { COLORS, SIZES } from '../theme';
 
 interface PlayerPanelProps {
   state: GameState;
@@ -10,13 +11,6 @@ interface PlayerPanelProps {
   onEndTurn: () => void;
   onUseBlessing: () => void;
 }
-
-const FACTION_COLORS: Record<string, string> = {
-  HUMAN: '#d4a017',
-  ELF: '#22c55e',
-  ORC: '#dc2626',
-  UNDEAD: '#8b5cf6',
-};
 
 export function PlayerPanel({ state, onBuyExtraAction, onEndTurn, onUseBlessing }: PlayerPanelProps) {
   const player = getPlayer(state, state.activePlayerId);
@@ -27,14 +21,14 @@ export function PlayerPanel({ state, onBuyExtraAction, onEndTurn, onUseBlessing 
 
   return (
     <div style={{
-      background: '#161b22',
-      border: `1px solid ${FACTION_COLORS[player.faction] || '#30363d'}`,
-      borderRadius: '8px',
-      padding: '12px',
-      marginBottom: '8px',
+      background: COLORS.ui.bgPanel,
+      border: `1px solid ${COLORS.faction[player.faction as keyof typeof COLORS.faction] || COLORS.ui.border}`,
+      borderRadius: SIZES.border.radius.lg,
+      padding: SIZES.panel.padding,
+      marginBottom: SIZES.spacing.md,
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-        <span style={{ color: FACTION_COLORS[player.faction], fontWeight: 700, fontSize: '14px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: SIZES.spacing.md }}>
+        <span style={{ color: COLORS.faction[player.faction as keyof typeof COLORS.faction], fontWeight: 700, fontSize: SIZES.fontSize.lg }}>
           {state.activePlayerId} – {player.faction}
         </span>
         <span style={{ color: '#8b949e', fontSize: '12px' }}>

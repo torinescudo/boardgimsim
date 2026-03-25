@@ -1,4 +1,5 @@
 import React from 'react';
+import { COLORS } from '../theme';
 import { GameState, UnitInstance } from '../../engine/core/types';
 import { getAscendableUnits } from '../../engine/selectors/selectors';
 import { getUnitDef } from '../../content/units/index';
@@ -8,12 +9,6 @@ interface AscendPanelProps {
   onAscend: (unitId: string, targetDefId: string) => void;
 }
 
-const FACTION_COLORS: Record<string, string> = {
-  HUMAN: '#d4a017',
-  ELF: '#22c55e',
-  ORC: '#dc2626',
-  UNDEAD: '#8b5cf6',
-};
 
 export function AscendPanel({ state, onAscend }: AscendPanelProps) {
   const ascendable = getAscendableUnits(state);

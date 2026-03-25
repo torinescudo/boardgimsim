@@ -50,7 +50,7 @@ export interface TraitDefinition {
   name: string;
   description: string;
   trigger: TraitTrigger;
-  /** Additional trait-specific config */
+  /** Additional trait-specific config - gradually moving to discriminated union pattern */
   config?: Record<string, unknown>;
 }
 

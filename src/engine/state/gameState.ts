@@ -7,7 +7,7 @@ import {
   ShopState, ReserveState, UnitInstance, HexCoord,
   BlessingState, LogEntry, RemainsToken,
 } from '../core/types';
-import { getTier1Units, getTier2Units, getTier3Units, getLeaderDef, ALL_UNITS } from '../../content/units/index';
+import { getTier1Units, getTier2Units, getTier3Units, getLeaderDef, getUnitDef, ALL_UNITS } from '../../content/units/index';
 import { LEADERS } from '../../content/leaders/leaders';
 import { RngService, createRng } from '../rng/rng';
 
@@ -207,4 +207,14 @@ export function getOpponent(state: GameState, playerId: string): PlayerState {
 /** Get all living units for a player */
 export function getPlayerUnits(state: GameState, playerId: string): UnitInstance[] {
   return state.units.filter(u => u.ownerPlayerId === playerId && u.hp > 0);
+}
+
+/** Get unit or leader definition by ID (consolidated lookup) */
+export function getDefinition(defId: string) {
+  return getUnitDef(defId) || LEADERS.find(l => l.id === defId);
+}
+
+/** Get definition name safely */
+export function getDefinitionName(defId: string): string {
+  return getDefinition(defId)?.name ?? defId;
 }

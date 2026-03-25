@@ -1,4 +1,5 @@
 import React from 'react';
+import { COLORS } from '../theme';
 import { GameState } from '../../engine/core/types';
 import { getUnitDef } from '../../content/units/index';
 
@@ -6,12 +7,6 @@ interface ReservePanelProps {
   state: GameState;
 }
 
-const FACTION_COLORS: Record<string, string> = {
-  HUMAN: '#d4a017',
-  ELF: '#22c55e',
-  ORC: '#dc2626',
-  UNDEAD: '#8b5cf6',
-};
 
 export function ReservePanel({ state }: ReservePanelProps) {
   return (

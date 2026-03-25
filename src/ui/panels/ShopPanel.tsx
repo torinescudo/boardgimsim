@@ -1,4 +1,5 @@
 import React from 'react';
+import { COLORS } from '../theme';
 import { GameState, HexCoord } from '../../engine/core/types';
 import { getUnitDef } from '../../content/units/index';
 import { getPlayer } from '../../engine/state/gameState';
@@ -9,12 +10,6 @@ interface ShopPanelProps {
   onRefresh: (slotIndex: number) => void;
 }
 
-const FACTION_COLORS: Record<string, string> = {
-  HUMAN: '#d4a017',
-  ELF: '#22c55e',
-  ORC: '#dc2626',
-  UNDEAD: '#8b5cf6',
-};
 
 export function ShopPanel({ state, onBuy, onRefresh }: ShopPanelProps) {
   const player = getPlayer(state, state.activePlayerId);
